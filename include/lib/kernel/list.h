@@ -1,83 +1,31 @@
 #ifndef __LIB_KERNEL_LIST_H
 #define __LIB_KERNEL_LIST_H
 
-/* Doubly linked list.
- *
- * This implementation of a doubly linked list does not require
- * use of dynamically allocated memory.  Instead, each structure
- * that is a potential list element must embed a struct list_elem
- * member.  All of the list functions operate on these `struct
- * list_elem's.  The list_entry macro allows conversion from a
- * struct list_elem back to a structure object that contains it.
+/* "Doubly linked list": 양방향 연결 리스트 구현을 위한 헤더 파일이며, 동적 할당된 메모리를 필요로 하지 않습니다.
+ 대신 각 구조체는 'struct list_elem' 멤버를 포함해야 합니다. 모든 리스트 함수는 이 'struct list_elem'을 사용하여 작동합니다.
+ 'list_entry' 매크로를 사용하여 'struct list_elem'을 포함한 구조체 객체로의 변환을 수행할 수 있습니다.
 
- * For example, suppose there is a needed for a list of `struct
- * foo'.  `struct foo' should contain a `struct list_elem'
- * member, like so:
+"List traversal": 리스트의 반복에 사용되는 함수들이 설명되어 있습니다.
+ 리스트의 시작점, 다음 요소, 끝점 등을 반환하는 함수들이 포함됩니다.
 
- * struct foo {
- *   struct list_elem elem;
- *   int bar;
- *   ...other members...
- * };
+"List insertion": 리스트에 요소를 삽입하는 함수들이 설명되어 있습니다.
+ 요소를 특정 위치에 삽입하거나, 앞쪽이나 뒤쪽에 삽입하는 함수들이 포함됩니다.
 
- * Then a list of `struct foo' can be be declared and initialized
- * like so:
+"List removal": 리스트에서 요소를 제거하는 함수들이 설명되어 있습니다.
+ 특정 요소를 제거하거나, 리스트의 맨 앞쪽이나 맨 뒤쪽에서 요소를 제거하는 함수들이 포함됩니다.
 
- * struct list foo_list;
+"List elements": 리스트의 처음과 끝에 위치한 요소를 반환하는 함수들이 설명되어 있습니다.
 
- * list_init (&foo_list);
+"List properties": 리스트의 크기와 비어 있는지 여부를 확인하는 함수들이 설명되어 있습니다.
 
- * Iteration is a typical situation where it is necessary to
- * convert from a struct list_elem back to its enclosing
- * structure.  Here's an example using foo_list:
+"Miscellaneous": 리스트를 뒤집는 함수가 포함되어 있습니다.
 
- * struct list_elem *e;
+"Operations on lists with ordered elements": 정렬된 요소를 가진 리스트에 대한 동작을 수행하는 함수들이 설명되어 있습니다.
+ 리스트를 정렬하거나, 정렬된 위치에 요소를 삽입하거나, 중복 요소를 제거하는 함수들이 포함됩니다.
 
- * for (e = list_begin (&foo_list); e != list_end (&foo_list);
- * e = list_next (e)) {
- *   struct foo *f = list_entry (e, struct foo, elem);
- *   ...do something with f...
- * }
+"Max and min": 최댓값과 최솟값을 반환하는 함수들이 포함되어 있습니다.
 
- * You can find real examples of list usage throughout the
- * source; for example, malloc.c, palloc.c, and thread.c in the
- * threads directory all use lists.
-
- * The interface for this list is inspired by the list<> template
- * in the C++ STL.  If you're familiar with list<>, you should
- * find this easy to use.  However, it should be emphasized that
- * these lists do *no* type checking and can't do much other
- * correctness checking.  If you screw up, it will bite you.
-
- * Glossary of list terms:
-
- * - "front": The first element in a list.  Undefined in an
- * empty list.  Returned by list_front().
-
- * - "back": The last element in a list.  Undefined in an empty
- * list.  Returned by list_back().
-
- * - "tail": The element figuratively just after the last
- * element of a list.  Well defined even in an empty list.
- * Returned by list_end().  Used as the end sentinel for an
- * iteration from front to back.
-
- * - "beginning": In a non-empty list, the front.  In an empty
- * list, the tail.  Returned by list_begin().  Used as the
- * starting point for an iteration from front to back.
-
- * - "head": The element figuratively just before the first
- * element of a list.  Well defined even in an empty list.
- * Returned by list_rend().  Used as the end sentinel for an
- * iteration from back to front.
-
- * - "reverse beginning": In a non-empty list, the back.  In an
- * empty list, the head.  Returned by list_rbegin().  Used as
- * the starting point for an iteration from back to front.
- *
- * - "interior element": An element that is not the head or
- * tail, that is, a real list element.  An empty list does
- * not have any interior elements.*/
+해당 헤더 파일은 양방향 연결 리스트의 구현을 제공하며, 리스트 관련 동작을 수행하기 위한 다양한 함수들을 포함하고 있습니다.*/
 
 #include <stdbool.h>
 #include <stddef.h>

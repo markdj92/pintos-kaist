@@ -53,7 +53,7 @@ is_tail (struct list_elem *elem) {
 	return elem != NULL && elem->prev != NULL && elem->next == NULL;
 }
 
-/* Initializes LIST as an empty list. */
+/* 리스트를 빈리스트로 초기화 한다 */
 void
 list_init (struct list *list) {
 	ASSERT (list != NULL);
@@ -63,27 +63,23 @@ list_init (struct list *list) {
 	list->tail.next = NULL;
 }
 
-/* Returns the beginning of LIST.  */
+/* "LIST의 시작 부분을 반환한다.  */
 struct list_elem *
 list_begin (struct list *list) {
 	ASSERT (list != NULL);
 	return list->head.next;
 }
 
-/* Returns the element after ELEM in its list.  If ELEM is the
-   last element in its list, returns the list tail.  Results are
-   undefined if ELEM is itself a list tail. */
+/* ELEM이 속한 리스트에서 ELEM 다음의 요소를 반환한다. 만약 ELEM이 리스트의 마지막 요소라면, 리스트의 꼬리(tail)를 반환한다. 만약 ELEM 자체가 리스트의 꼬리라면, 결과는 정의되지 않는다. */
 struct list_elem *
 list_next (struct list_elem *elem) {
 	ASSERT (is_head (elem) || is_interior (elem));
 	return elem->next;
 }
 
-/* Returns LIST's tail.
+/* LIST의 꼬리를 반환한다.
 
-   list_end() is often used in iterating through a list from
-   front to back.  See the big comment at the top of list.h for
-   an example. */
+list_end() 함수는 주로 리스트를 앞에서 뒤로 순회하는 데에 사용된다. 예시를 보려면 list.h 상단에 있는 큰 주석을 참조하라. */
 struct list_elem *
 list_end (struct list *list) {
 	ASSERT (list != NULL);
@@ -412,9 +408,12 @@ list_sort (struct list *list, list_less_func *less, void *aux) {
 	ASSERT (is_sorted (list_begin (list), list_end (list), less, aux));
 }
 
-/* Inserts ELEM in the proper position in LIST, which must be
-   sorted according to LESS given auxiliary data AUX.
-   Runs in O(n) average case in the number of elements in LIST. */
+/*주어진 요소(ELEM)를 정렬된 리스트(LIST)에 적절한 위치에 삽입하는 작업을 설명하고 있습니다.
+ LESS는 비교 함수로서, 이 함수를 통해 리스트의 정렬 순서가 결정됩니다.
+ AUX는 비교 함수에 추가적인 정보를 제공하는 데 사용될 수 있는 보조 데이터입니다.
+ 이 작업은 평균적으로 리스트에 있는 요소의 수(n)에 비례하는 시간이 걸린다고 설명하고 있습니다.
+ 이는 리스트의 모든 요소를 한 번씩 검사해야 할 수 있기 때문입니다. 
+ 이를 시간 복잡도 표기법으로 표현하면 O(n)이 됩니다. */
 void
 list_insert_ordered (struct list *list, struct list_elem *elem,
 		list_less_func *less, void *aux) {
@@ -430,10 +429,10 @@ list_insert_ordered (struct list *list, struct list_elem *elem,
 	return list_insert (e, elem);
 }
 
-/* Iterates through LIST and removes all but the first in each
-   set of adjacent elements that are equal according to LESS
-   given auxiliary data AUX.  If DUPLICATES is non-null, then the
-   elements from LIST are appended to DUPLICATES. */
+/* 리스트에서 중복 요소를 처리하는 방법을 설명합니다.
+ LESS 함수를 사용하여 인접한 요소들이 동일한지 확인하고,
+ 동일한 요소들 중 첫 번째를 제외한 나머지를 모두 제거합니다.
+ AUX는 LESS 함수에 추가 정보를 제공하는 보조 데이터입니다. */
 void
 list_unique (struct list *list, struct list *duplicates,
 		list_less_func *less, void *aux) {

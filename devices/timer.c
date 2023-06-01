@@ -18,7 +18,9 @@
 #endif
 
 /* Number of timer ticks since OS booted. */
+
 static int64_t ticks;
+
 
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
@@ -27,7 +29,8 @@ static unsigned loops_per_tick;
 static intr_handler_func timer_interrupt;
 static bool too_many_loops (unsigned loops);
 static void busy_wait (int64_t loops);
-static void real_time_sleep (int64_t num, int32_t denom);
+static void real_time_sleep (int64_t num, int32_t denom);\
+// static int64_t global_ticks = 0 ;
 
 /* Sets up the 8254 Programmable Interval Timer (PIT) to
    interrupt PIT_FREQ times per second, and registers the
@@ -70,7 +73,10 @@ timer_calibrate (void) {
 	printf ("%'"PRIu64" loops/s.\n", (uint64_t) loops_per_tick * TIMER_FREQ);
 }
 
-/* Returns the number of timer ticks since the OS booted. */
+/*OS가 부팅된 이후로 경과한 타이머 틱(tick) 수를 반환합니다. */
+/*이 함수는 운영 체제가 부팅된 이후 경과한 타이머 틱의 수를 계산하여 반환합니다.
+ 타이머 틱은 일반적으로 컴퓨터의 하드웨어 타이머에 의해 생성되는 고정된 간격의 시간 단위를 나타냅니다.
+ 이 값은 시스템이 부팅된 이후의 경과 시간을 추적하는 데 사용될 수 있습니다.*/
 int64_t
 timer_ticks (void) {
 	enum intr_level old_level = intr_disable ();
@@ -80,22 +86,22 @@ timer_ticks (void) {
 	return t;
 }
 
-/* Returns the number of timer ticks elapsed since THEN, which
-   should be a value once returned by timer_ticks(). */
+/* timer_ticks() 함수는 THEN 이후로 경과한 타이머 틱(tick)의 수를 반환합니다. 여기서 THEN은 이전에 timer_ticks() 함수를 호출하여 얻은 값입니다.*/
+/* timer_ticks() 함수는 프로그램이 실행된 이후 경과한 타이머 틱의 수를 반환하여 경과한 시간을 추적하는 데 사용될 수 있습니다.*/
 int64_t
 timer_elapsed (int64_t then) {
 	return timer_ticks () - then;
 }
 
-/* Suspends execution for approximately TICKS timer ticks. */
+/* Ticks 타이머 틱에 대해 실행을 일시 중단한다. "TICKS"는 실행이 중단되는 시간을 나타내는 값입니다. 의미는 주어진 시간(TICKS) 동안 프로그램 실행을 중지하고 대기하는 것을 의미*/
 void
-timer_sleep (int64_t ticks) {
+timer_sleep (int64_t ticks) { /*timer_ticks함수를 호출하여 현재 시간을 저장한다.*/
 	int64_t start = timer_ticks ();
-
-	ASSERT (intr_get_level () == INTR_ON);
-	while (timer_elapsed (start) < ticks)
-		thread_yield ();
-}
+	
+	ASSERT (intr_get_level () == INTR_ON);/*특정 지점에서 인터럽트가 활성화된 상태임을 검사한다. 이 조건은 보통 인터럽트 처리에 관련된 코드에서 사용되며, 인터럽트가 활성화된 상태에서 실행되어야 하는 것을 보장하기 위해 사용된다.*/
+	if(timer_elapsed (start) < ticks) /*timer_elapsed(start) 함수를 호출하여 start 시간부터 현재까지 경과한 시간을 계산합니다. 이는 타이머의 경과 시간을 가져오는 함수입니다.해당 값을 global tick값과 비교한다.*/
+		thread_sleep(start + ticks);/*thread_sleep(start + ticks)는 "현재 시간(start)으로부터 특정 시간(ticks)이 지난 후에 스레드를 깨우십시오"라는 명령을 나타냅니다. 즉, 스레드는 start + ticks시점에 깨어나게 됩니다.*/
+}//start + ticks 시점에 도달하면, 스레드는 깨어나게 되며(thread_wakeup), 이 스레드는 다시 실행 가능한 상태가 됩니다.
 
 /* Suspends execution for approximately MS milliseconds. */
 void
@@ -122,11 +128,7 @@ timer_print_stats (void) {
 }
 
 /* Timer interrupt handler. */
-static void
-timer_interrupt (struct intr_frame *args UNUSED) {
-	ticks++;
-	thread_tick ();
-}
+
 
 /* Returns true if LOOPS iterations waits for more than one timer
    tick, otherwise false. */
@@ -146,6 +148,8 @@ too_many_loops (unsigned loops) {
 	return start != ticks;
 }
 
+
+
 /* Iterates through a simple loop LOOPS times, for implementing
    brief delays.
 
@@ -158,6 +162,8 @@ busy_wait (int64_t loops) {
 	while (loops-- > 0)
 		barrier ();
 }
+
+
 
 /* Sleep for approximately NUM/DENOM seconds. */
 static void
@@ -184,3 +190,28 @@ real_time_sleep (int64_t num, int32_t denom) {
 		busy_wait (loops_per_tick * num / 1000 * TIMER_FREQ / (denom / 1000));
 	}
 }
+
+/*타이머 인터럽트가 발생했을 때  호출되는 함수이다. 운영체제의 스케줄링과 관련된 작업을 수행한다.*/
+static void timer_interrupt (struct intr_frame *args UNUSED)
+{
+	ticks++;
+	thread_tick ();
+	while (global_tick <= ticks)
+		thread_wakeup();
+	// if (thread_mlfqs == true)
+	// {
+	// 	thread_current()->recent_cpu += (1 << 14);
+
+	// 	if (ticks % TIMER_FREQ == 0)
+	// 	{
+	// 		calculate_load_avg();
+	// 		calculate_recent_cpu();
+	// 	}
+	// 	if (ticks % 4 == 0)
+	// 	{
+	// 		recalculate_priority();
+	// 	}
+	// }	
+
+}
+   

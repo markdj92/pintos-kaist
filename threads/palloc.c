@@ -284,13 +284,12 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt) {
 	return pages;
 }
 
-/* Obtains a single free page and returns its kernel virtual
-   address.
-   If PAL_USER is set, the page is obtained from the user pool,
-   otherwise from the kernel pool.  If PAL_ZERO is set in FLAGS,
-   then the page is filled with zeros.  If no pages are
-   available, returns a null pointer, unless PAL_ASSERT is set in
-   FLAGS, in which case the kernel panics. */
+/* 단일의 빈 페이지를 얻어 그 페이지의 커널 가상 주소를 반환합니다.
+	만약 PAL_USER가 설정되어 있다면, 페이지는 사용자 풀(user pool)에서 얻어지고,
+	그렇지 않다면 커널 풀(kernel pool)에서 얻어집니다.
+	만약 PAL_ZERO가 FLAGS에 설정되어 있다면, 페이지는 0으로 채워집니다.
+	만약 사용할 수 있는 페이지가 없다면,
+	null 포인터를 반환합니다, 단, PAL_ASSERT가 FLAGS에 설정되어 있다면 커널이 패닉 상태에 빠집니다  */
 void *
 palloc_get_page (enum palloc_flags flags) {
 	return palloc_get_multiple (flags, 1);

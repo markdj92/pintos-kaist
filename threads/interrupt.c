@@ -146,7 +146,7 @@ intr_enable (void) {
 	return old_level;
 }
 
-/* Disables interrupts and returns the previous interrupt status. */
+/* 인터럽트를 비활성화하고 이전의 인터럽트 상태를 반환합니다, 이는 인터럽트 상태를 임시로 변경한 후, 원래 상태로 복원하는데 필요할 때 유용하게 사용됩니다. */
 enum intr_level
 intr_disable (void) {
 	enum intr_level old_level = intr_get_level ();
